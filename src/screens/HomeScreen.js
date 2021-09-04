@@ -64,7 +64,7 @@ const HomeScreen = ({navigation, route}) => {
         <Button
           title= "Settings"
           onPress={() => {
-              navigation.navigate('SettingsScreen', {min:hairMinQualifier, max:hairMaxQualifier, minOn:isMinEnabled, maxOn:isMaxEnabled}); //, minOn: minOn, maxOn:maxOn
+              navigation.navigate('SettingsScreen', {min:hairMinQualifier, max:hairMaxQualifier, minOn:isMinEnabled, maxOn:isMaxEnabled});
           }}
         />
       </ScrollView>
