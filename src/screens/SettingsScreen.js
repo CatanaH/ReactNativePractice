@@ -3,12 +3,17 @@ import React, { useState, useEffect  } from 'react';
 import { Button, View, Text, StyleSheet, ScrollView, StatusBar, SafeAreaView, Switch} from 'react-native';
 import { Input } from 'react-native-elements';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MinProvider, useMinContext } from '../contexts/min';
 
 const STORAGE_KEY = '@save_temp'
 
 const SettingsScreen = ({navigation, route}) => {
-  const { min, max, minOn, maxOn } = route.params
+  // const { min, max, minOn, maxOn } = route.params
   
+  // const minContext = React.useContext(MinContext)
+  // const {value} = useMinContext();
+  const { min, setMin }= value //supposed to be drawing from context
+
   const [minTemp, setMinTemp] = useState(min.toString());
   const [maxTemp, setMaxTemp] = useState(max.toString());
   const [isMinEnabled, setIsMinEnabled] = useState(minOn);
@@ -29,7 +34,9 @@ const SettingsScreen = ({navigation, route}) => {
         //parsing turns it from JSON to js object 
         const gottenData = JSON.parse(jsonValue) 
         setMinTemp(gottenData.min);
-        setMaxTemp(gottenData.max);   
+        setMaxTemp(gottenData.max);
+      // setMinContext(1)
+      alert(`min Context is ${value}`)
       }
     } catch(e) {
       console.log(e)
