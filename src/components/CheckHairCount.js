@@ -1,29 +1,34 @@
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
+import { MinContext, MaxContext, IsMinOnContext, IsMaxOnContext } from '../contexts/min';
 
 
 function CheckHairCount(prop) {
+  const [minTemp, setMinTemp] = React.useContext(MinContext)
+  const [maxTemp, setMaxTemp] = React.useContext(MaxContext)
+  const [isMinOn, setIsMinOn] = React.useContext(IsMinOnContext)
+  const [isMaxOn, setIsMaxOn] = React.useContext(IsMaxOnContext)
   const num = prop.num;
   const textStyle = prop.styles;
-  const { min=32, max=100, minOn=true, maxOn=false } = prop;
+  // const { minTemp=32, maxTemp=100, isMinOn=true, isMaxOn=false } = prop;
   let localStyle = '';
   
-  if (minOn && maxOn) {
-    if (num > min && num < max) {
+  if (isMinOn && isMaxOn) {
+    if (num > minTemp && num < maxTemp) {
       localStyle = styles.good
     } else {
       localStyle = styles.bad
     }
   
-  } else if (!maxOn) { //only min on
-    if (num > min) {
+  } else if (!isMaxOn) { //only minTemp on
+    if (num > minTemp) {
       localStyle = styles.good
     } else {
       localStyle = styles.bad
     }
   
-  } else if (!minOn) { //only max On
-    if (num < max) {
+  } else if (!isMinOn) { //only maxTemp On
+    if (num < maxTemp) {
       localStyle = styles.good
     } else {
       localStyle = styles.bad
@@ -33,7 +38,7 @@ function CheckHairCount(prop) {
 
   return (
     <>
-    { !minOn || !maxOn ? 
+    { isMinOn || isMaxOn ? 
       <Text styles={[textStyle, localStyle]}>{num}</Text>
       : 
       <Text>nothing is on</Text>
