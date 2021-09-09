@@ -1,31 +1,40 @@
 import 'react-native-gesture-handler';
-import React, { useState } from 'react';
+import React, {useEffect} from 'react';
 import { Button, View, Text, StyleSheet, ScrollView, StatusBar, SafeAreaView} from 'react-native';
 import CheckHairCount from '../components/CheckHairCount';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { MinContext, MaxContext, IsMinOnContext, IsMaxOnContext } from '../contexts/min';
 
 function makeRandomCount() {
     return Math.floor(Math.random()*100)
 }
-
+const STORAGE_KEY = '@save_temp'
 const HomeScreen = ({navigation, route}) => {
   
-  //is this really the best way to hold data? does it need state, and can it just be global? this page only needs to read, not change anything
-  //but bc page is rendered first it has to be loaded with default data, or it errors
-  const [ hairMinQualifier, setHairMinQualifier ] = useState(25); 
-  const [ hairMaxQualifier, setHairMaxQualifier ] = useState(100);
-  const [ isMinEnabled, setIsMinEnabled ] = useState(true); 
-  const [ isMaxEnabled, setIsMaxEnabled ] = useState(false); 
+  const [min, setMin] = React.useContext(MinContext)
+  const [max, setMax] = React.useContext(MaxContext)
+  const [isMinOn, setIsMinOn] = React.useContext(IsMinOnContext)
+  const [isMaxOn, setIsMaxOn] = React.useContext(IsMaxOnContext)
   
+  useEffect(() => {
+    readData()
+  }, [])
 
-  React.useEffect(()=>{
-    if (route.params){
-      const { min=32, max=100, minOn=true, maxOn=false } = route.params
-      setHairMinQualifier(min)
-      setHairMaxQualifier(max)
-      setIsMinEnabled(minOn)
-      setIsMaxEnabled(maxOn)
-    }}, [route.params]
-  )
+  const readData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY)
+      if (jsonValue !== null) {
+        //parsing turns it from JSON to js object 
+        const gottenData = JSON.parse(jsonValue) 
+        setMin(gottenData.min);
+        setMax(gottenData.max);        
+      }
+    } catch(e) {
+      console.log(e)
+      alert("error reading async state data, move on..")
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -36,7 +45,7 @@ const HomeScreen = ({navigation, route}) => {
             <Text style={styles.text}>Hello, I am your cat!</Text>
             <Text style={styles.text}>My current hair count is (million):</Text>
             <View style={styles.numBox}>
-              <CheckHairCount min={hairMinQualifier} max={hairMaxQualifier} minOn={isMinEnabled} maxOn={isMaxEnabled} styles={styles.numText} num={makeRandomCount()} />  
+              <CheckHairCount styles={styles.numText} num={makeRandomCount()} />  
             </View>
           </View>
           <View style={[styles.bodyContainer, styles.secondContainer]}>
@@ -44,27 +53,27 @@ const HomeScreen = ({navigation, route}) => {
               <Text style={styles.subText}>Im a turtle</Text>
               <Text style={styles.subText}>I need many less hairs:</Text>
               <View style={[styles.numBox, styles.subNumBox]}>
-                <CheckHairCount min={hairMinQualifier} max={hairMaxQualifier} minOn={isMinEnabled} maxOn={isMaxEnabled} styles={[styles.subNumText]} num={makeRandomCount()} />  
+                <CheckHairCount styles={[styles.subNumText]} num={makeRandomCount()} />  
               </View>
             </View>
             <View style={[styles.bodyContainer, styles.miniContainer]}>
               <Text style={styles.subText}>Im a tribble</Text>
               <Text style={styles.subText}>I need many many hairs:</Text>
               <View style={[styles.numBox, styles.subNumBox]}>
-                <CheckHairCount min={hairMinQualifier} max={hairMaxQualifier} minOn={isMinEnabled} maxOn={isMaxEnabled} styles={[styles.subNumText]} num={makeRandomCount()} />  
+                <CheckHairCount styles={[styles.subNumText]} num={makeRandomCount()} />  
               </View>
             </View>
           </View>
           <View style={styles.bodyContainer}>
-            <Text>{hairMinQualifier}</Text>
-            <Text>{hairMaxQualifier}</Text>
+            <Text>{min}</Text> 
+            <Text>{max}</Text>
 
           </View>
         </View>
         <Button
           title= "Settings"
           onPress={() => {
-              navigation.navigate('SettingsScreen', {min:hairMinQualifier, max:hairMaxQualifier, minOn:isMinEnabled, maxOn:isMaxEnabled});
+              navigation.navigate('SettingsScreen');
           }}
         />
       </ScrollView>

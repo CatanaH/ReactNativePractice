@@ -3,56 +3,36 @@ import React, { useState, useEffect  } from 'react';
 import { Button, View, Text, StyleSheet, ScrollView, StatusBar, SafeAreaView, Switch} from 'react-native';
 import { Input } from 'react-native-elements';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MinContext, MaxContext, IsMinOnContext, IsMaxOnContext } from '../contexts/min';
 
 const STORAGE_KEY = '@save_temp'
 
 const SettingsScreen = ({navigation, route}) => {
-  const { min, max, minOn, maxOn } = route.params
-  
-  const [minTemp, setMinTemp] = useState(min.toString());
-  const [maxTemp, setMaxTemp] = useState(max.toString());
-  const [isMinEnabled, setIsMinEnabled] = useState(minOn);
-  const [isMaxEnabled, setIsMaxEnabled] = useState(maxOn);
 
-  const toggleMinSwitch = () => setIsMinEnabled(previousState => !previousState);
-  const toggleMaxSwitch = () => setIsMaxEnabled(previousState => !previousState);
+  const [min, setMin] = React.useContext(MinContext)
+  const [max, setMax] = React.useContext(MaxContext)
+  const [isMinOn, setIsMinOn] = React.useContext(IsMinOnContext)
+  const [isMaxOn, setIsMaxOn] = React.useContext(IsMaxOnContext)
 
+  const toggleMinSwitch = () => setIsMinOn(previousState => !previousState);
+  const toggleMaxSwitch = () => setIsMaxOn(previousState => !previousState);
 
-  useEffect(() => {
-    readData()
-  }, [])
-
-  const readData = async () => {
-    try {
-      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY)
-      if (jsonValue !== null) {
-        //parsing turns it from JSON to js object 
-        const gottenData = JSON.parse(jsonValue) 
-        setMinTemp(gottenData.min);
-        setMaxTemp(gottenData.max);   
-      }
-    } catch(e) {
-      console.log(e)
-      alert("error reading async state data, move on..")
-    }
-  }
 
   const saveData = async (value) => {
     try {
       const jsonValue = JSON.stringify(value)
       await AsyncStorage.setItem(STORAGE_KEY, jsonValue)
-      // setMinTemp(value.min)
-      // setMaxTemp(value.max)
+      setMin(value.min)
+      setMax(value.max)
       alert('Data successfully saved')
     } catch (e) {
       alert('Failed to save the data to the storage')
     }
   }
 
-  const onPressButton = (min, max, isMinEnabled, isMaxEnabled) => {
-    saveData({"min":min, "max":max}),
-    // setTemp('') - dont know why set back to empty string?
-    navigation.navigate('HomeScreen', {min:min, max:max, minOn:isMinEnabled, maxOn:isMaxEnabled})
+  const onPressButton = () => {
+    saveData({"min":min, "max":max, "isMinOn":isMinOn, "isMaxOn":isMaxOn}),
+    navigation.navigate('HomeScreen')
   }
 
   return (
@@ -65,36 +45,36 @@ const SettingsScreen = ({navigation, route}) => {
           />
           <Switch
             trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={isMinEnabled ? "#f5dd4b" : "#f4f3f4"}
+            thumbColor={isMinOn ? "#f5dd4b" : "#f4f3f4"}
             ios_backgroundColor="#3e3e3e"
             onValueChange={toggleMinSwitch}
-            value={isMinEnabled}
+            value={isMinOn}
           />
           <Input
             label="MIN Temp"
-            value={minTemp}
-            disabled={!isMinEnabled}
-            placeholder={minTemp}
-            onChangeText={(value) => setMinTemp(value)}
+            value={min.toString()}
+            disabled={!isMinOn}
+            placeholder={min.toString()}
+            onChangeText={(value) => setMin(value)}
           />
           <Switch
             trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={isMaxEnabled ? "#f5dd4b" : "#f4f3f4"}
+            thumbColor={isMaxOn ? "#f5dd4b" : "#f4f3f4"}
             ios_backgroundColor="#3e3e3e"
             onValueChange={toggleMaxSwitch}
-            value={isMaxEnabled}
+            value={isMaxOn}
           />
            <Input
             label="MAX Temp"
-            value={maxTemp}
-            disabled={!isMaxEnabled}
-            placeholder={maxTemp}
-            onChangeText={(value) => setMaxTemp(value)}
+            value={max.toString()}
+            disabled={!isMaxOn}
+            placeholder={max.toString()}
+            onChangeText={(value) => setMax(value)}
           />
           <View style={styles.secondContainer}>
             <Button title="SAVE"
               onPress={()=> {
-                onPressButton(minTemp, maxTemp, isMinEnabled, isMaxEnabled)
+                onPressButton()
               }}
             />
           </View>
