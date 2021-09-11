@@ -2,4 +2,6 @@ My practice with React Native before making an official mobile app
 
 uses: 
 react native with expo
+persistent storage, with AsyncStorage
+Global State, with Context hooks
 styling custom and Flexbox
